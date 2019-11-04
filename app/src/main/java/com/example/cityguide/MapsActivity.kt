@@ -13,6 +13,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 
 /**
  *
@@ -66,6 +67,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             if(location != null) {
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
+                placeMarkerOnMap(currentLatLng)
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,12F))
             }
         }
@@ -88,6 +90,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         map.setOnMarkerClickListener(this)
 
         setUpMap()
+    }
+
+    // The Android Maps API lets you use a marker object,
+    // which is an icon that can be placed at a particular point on the map’s surface.
+    private fun placeMarkerOnMap(location: LatLng) {
+        // 1
+        val markerOptions = MarkerOptions().position(location)
+        // 2
+        map.addMarker(markerOptions)
     }
 
     override fun onMarkerClick(p0: Marker?) = false
