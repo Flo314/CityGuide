@@ -11,6 +11,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -60,6 +61,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
          lorsque vous appuyez dessus, la centre sur l'emplacement de l'utilisateur.*/
         map.isMyLocationEnabled = true
 
+        // Change the card type
+        map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+
         // Donne l'emplacement le plus récent disponible.
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             // Si vous avez pu récupérer l'emplacement le plus récent,
@@ -90,15 +94,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         map.setOnMarkerClickListener(this)
 
         setUpMap()
+        setMapLongClick(map)
     }
 
     // The Android Maps API lets you use a marker object,
     // which is an icon that can be placed at a particular point on the map’s surface.
     private fun placeMarkerOnMap(location: LatLng) {
-        // 1
+
         val markerOptions = MarkerOptions().position(location)
-        // 2
+
+        // change color marker
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
+            BitmapDescriptorFactory.HUE_BLUE))
+
+
         map.addMarker(markerOptions)
+    }
+
+    // Allow users to add a marker with a long click
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { LatLng ->
+            map.addMarker(MarkerOptions().position(LatLng))
+        }
     }
 
     override fun onMarkerClick(p0: Marker?) = false
