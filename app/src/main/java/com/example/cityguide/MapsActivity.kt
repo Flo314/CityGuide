@@ -72,7 +72,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 placeMarkerOnMap(currentLatLng)
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,12F))
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,15F))
             }
         }
     }
@@ -95,13 +95,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         setUpMap()
         setMapLongClick(map)
+        setPoiClick(map)
     }
 
     // The Android Maps API lets you use a marker object,
     // which is an icon that can be placed at a particular point on the map’s surface.
     private fun placeMarkerOnMap(location: LatLng) {
 
-        val markerOptions = MarkerOptions().position(location)
+        val markerOptions = MarkerOptions().position(location).title(getString(R.string.dropped_pin))
 
         // change color marker
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
@@ -114,7 +115,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     // Allow users to add a marker with a long click
     private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { LatLng ->
-            map.addMarker(MarkerOptions().position(LatLng))
+
+            map.addMarker(MarkerOptions()
+                .position(LatLng))
+
+        }
+    }
+
+    // Add a Points of Interest Auditor
+    private fun setPoiClick(map: GoogleMap) {
+        map.setOnPoiClickListener { poi ->
+            val poiMarker = map.addMarker(
+                MarkerOptions()
+                    .position(poi.latLng)
+                    .title(poi.name)
+            )
+            poiMarker.showInfoWindow()
         }
     }
 
