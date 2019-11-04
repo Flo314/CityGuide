@@ -1,6 +1,7 @@
 package com.example.cityguide
 
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -12,7 +13,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 
 /**
  *
@@ -22,6 +22,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var lastLocation: Location
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +34,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        setUpMap()
     }
 
     // Request location permission
@@ -41,9 +41,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
-    // vérifie si l'application a reçu l' autorisation ACCESS_FINE_LOCATION.
-    // Si ce n'est pas le cas, demandez-le à l'utilisateur
-    /*checks if the app has been granted the ACCESS_FINE_LOCATION permission.
+
+    /* Checks if the app has been granted the ACCESS_FINE_LOCATION permission.
      If it hasn’t, then request it from the user.*/
     private fun setUpMap() {
         if (ActivityCompat.checkSelfPermission(this,
@@ -51,6 +50,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             ActivityCompat.requestPermissions(this,
                 arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             return
+        }
+
+        // *** Getting current location ***
+
+        /* Active la my-locationcouche qui dessine un point bleu clair sur l'emplacement de l'utilisateur.
+         Il ajoute également un bouton à la carte qui,
+         lorsque vous appuyez dessus, la centre sur l'emplacement de l'utilisateur.*/
+        map.isMyLocationEnabled = true
+
+        // Donne l'emplacement le plus récent disponible.
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            // Si vous avez pu récupérer l'emplacement le plus récent,
+            // déplacez la caméra vers l'emplacement actuel de l'utilisateur.
+            if(location != null) {
+                lastLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,12F))
+            }
         }
     }
 
@@ -66,15 +83,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val toulouse = LatLng(43.600000, 1.433333)
-        map.addMarker(MarkerOptions().position(toulouse).title("Marker in Toulouse"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(toulouse, 12.0F))
-
         //activate the zoom controls on the map
         map.uiSettings.isZoomControlsEnabled = true
         map.setOnMarkerClickListener(this)
+
+        setUpMap()
     }
 
     override fun onMarkerClick(p0: Marker?) = false
+
+
 }
